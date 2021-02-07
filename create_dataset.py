@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import TensorDataset
-
+import torchvision
 
 def create_dataset(data_path, output_path=None, contrast_normalization=False, whiten=False):
     """
@@ -61,7 +61,12 @@ def create_dataset(data_path, output_path=None, contrast_normalization=False, wh
         if output_path:
             torch.save(preprocessed_data, output_path)
 
-    train_ds = TensorDataset(data_tr[sets_tr == 1], label_tr[sets_tr == 1])
+    transforms = torchvision.transforms.Compose([
+        torchvision.transforms.RandomHorizontalFlip(1)
+    ])
+    combinedtr = torch.cat((data_tr[sets_tr == 1],transforms(data_tr[sets_tr == 1])),0)
+    combinedlabel = torch.cat((label_tr[sets_tr == 1],label_tr[sets_tr == 1]),0)
+    train_ds = TensorDataset(combinedtr,combinedlabel)
     val_ds = TensorDataset(data_tr[sets_tr == 2], label_tr[sets_tr == 2])
 
     return train_ds, val_ds

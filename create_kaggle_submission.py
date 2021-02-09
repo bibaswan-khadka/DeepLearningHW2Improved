@@ -40,31 +40,32 @@ def create_submission(model_type):
     else:
         model = cnn_categorization_improved(model_state['specs'])
 
-    model.load_state_dict(load(model_state['state']))
-    model.eval()
-    soft_max = Softmax(dim=1)
+    with torch.no_grad():
+      model.load_state_dict(load(model_state['state']))
+      model.eval()
+      soft_max = Softmax(dim=1)
 
-    # validation set
-    prob_val = soft_max(model(data_val).squeeze())
-    assert prob_val.size() == (6400, 16), f"Expected the output of the validation set to be of size (6400, 16) " \
-                                          f"but was {prob_val.size()} instead"
-    prob_val = torch.max(prob_val, dim=1)[1]
+      # validation set
+      prob_val = soft_max(model(data_val).squeeze())
+      assert prob_val.size() == (6400, 16), f"Expected the output of the validation set to be of size (6400, 16) " \
+                                            f"but was {prob_val.size()} instead"
+      prob_val = torch.max(prob_val, dim=1)[1]
 
-    with Path(f"kaggle_{model_type}_val_submission.csv").open(mode="w") as writer:
-        writer.write("Id,Category\n")
-        for i in range(len(prob_val)):
-            writer.write(f"{i},{prob_val[i]}\n")
+      with Path(f"kaggle_{model_type}_val_submission.csv").open(mode="w") as writer:
+          writer.write("Id,Category\n")
+          for i in range(len(prob_val)):
+              writer.write(f"{i},{prob_val[i]}\n")
 
-    # test set
-    prob_test = soft_max(model(data_te).squeeze())
-    assert prob_test.size() == (9600, 16), f"Expected the output of the test set to be of size (9600, 16) " \
-                                           f"but was {prob_test.size()} instead"
-    prob_test = torch.max(prob_test, dim=1)[1]
+      # test set
+      prob_test = soft_max(model(data_te).squeeze())
+      assert prob_test.size() == (9600, 16), f"Expected the output of the test set to be of size (9600, 16) " \
+                                            f"but was {prob_test.size()} instead"
+      prob_test = torch.max(prob_test, dim=1)[1]
 
-    with Path(f"kaggle_{model_type}_test_submission.csv").open(mode="w") as writer:
-        writer.write("Id,Category\n")
-        for i in range(len(prob_test)):
-            writer.write(f"{i},{prob_test[i]}\n")
+      with Path(f"kaggle_{model_type}_test_submission.csv").open(mode="w") as writer:
+          writer.write("Id,Category\n")
+          for i in range(len(prob_test)):
+              writer.write(f"{i},{prob_test[i]}\n")
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 from torch import nn
+import torch
 
 def cnn_categorization_improved(netspec_opts):
     """
@@ -15,6 +16,7 @@ def cnn_categorization_improved(netspec_opts):
     """
     # instantiate an instance of nn.Sequential
     net = nn.Sequential()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # add layers as specified in netspec_opts to the network
     kernal_size = netspec_opts['kernel_size']
@@ -40,4 +42,5 @@ def cnn_categorization_improved(netspec_opts):
             net.add_module("pool" + str(index), nn.AvgPool2d(size_kernal, strid, 0))
         if type_layer == "drop":
             net.add_module("drop" + str(index), nn.Dropout2d(0.2))
+    net.to(device)
     return net

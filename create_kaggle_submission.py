@@ -9,6 +9,7 @@ from torch.nn import Softmax
 from cnn_categorization_base import cnn_categorization_base
 from cnn_categorization_improved import cnn_categorization_improved
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def create_submission(model_type):
     """
@@ -29,7 +30,9 @@ def create_submission(model_type):
     dataset = load(data_path)
     # the relevant data sets
     data_val = dataset["data_tr"][dataset["sets_tr"] == 2]
+    data_val = data_val.to(device)
     data_te = dataset["data_te"]
+    data_te = data_te.to(device)
 
     model_state = load(model_path)
     if model_type == 'base':

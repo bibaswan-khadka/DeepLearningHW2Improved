@@ -3,7 +3,10 @@ from torch.nn import CrossEntropyLoss
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from os import path, mkdir
+import torch
+import torchvision
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def train(model, train_ds, val_ds, train_opts, exp_dir=None):
     """
@@ -34,9 +37,9 @@ def train(model, train_ds, val_ds, train_opts, exp_dir=None):
         weight_decay=train_opts["weight_decay"]
     )
 
-    lr_scheduler = optim.lr_scheduler.StepLR(
+    lr_scheduler = optim.lr_scheduler.MultiStepLR(
         optimizer=optimizer,
-        step_size=train_opts["step_size"],
+        milestones=train_opts["step_size"],
         gamma=train_opts["gamma"]
     )
 
@@ -106,9 +109,12 @@ def fit(epoch, model, data_loader, criterion, optimizer=None, scheduler=None):
     """
     epoch_loss = epoch_acc = 0
     for mini_x, mini_y in data_loader:
+        mini_x = mini_x.to(device)
+        mini_y = mini_y.to(device)
+        
         pred = model(mini_x).squeeze()
         loss = criterion(pred, mini_y)
-
+        
         epoch_loss += loss.item()
         epoch_acc += mini_y.eq(pred.argmax(dim=1)).sum().item()
 

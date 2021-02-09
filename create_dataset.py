@@ -64,10 +64,30 @@ def create_dataset(data_path, output_path=None, contrast_normalization=False, wh
     transforms = torchvision.transforms.Compose([
         torchvision.transforms.RandomHorizontalFlip(1)
     ])
-    combinedtr = torch.cat((data_tr[sets_tr == 1],transforms(data_tr[sets_tr == 1])),0)
-    combinedlabel = torch.cat((label_tr[sets_tr == 1],label_tr[sets_tr == 1]),0)
-    train_ds = TensorDataset(combinedtr,combinedlabel)
-    val_ds = TensorDataset(data_tr[sets_tr == 2], label_tr[sets_tr == 2])
 
+    transformscrop = torchvision.transforms.Compose([
+      torchvision.transforms.RandomCrop((18,18)),
+    ])
+
+    transformspers = torchvision.transforms.Compose([
+      torchvision.transforms.RandomPerspective(),
+    ])
+    transformsjitter = torchvision.transforms.Compose([
+      torchvision.transforms.ColorJitter(),
+    ])
+    pers = transformspers(data_tr[sets_tr == 1])
+    crops = transformscrop(data_tr[sets_tr == 1])
+    # jitter = transformsjitter(data_tr[sets_tr == 1])
+    resized = torch.nn.functional.interpolate(crops,size=32)
+    combinedtr = torch.cat((data_tr[sets_tr == 1],transforms(data_tr[sets_tr == 1])),0)
+    combinedtrcrop = torch.cat((combinedtr,resized),0)
+    combinedtrcrop = torch.cat((combinedtrcrop,pers),0)
+    # combinedtrcrop = torch.cat((combinedtrcrop,jitter),0)
+    combinedlabel = torch.cat((label_tr[sets_tr == 1],label_tr[sets_tr == 1]),0)
+    combinedlabelcrop = torch.cat((combinedlabel,label_tr[sets_tr == 1]),0)
+    combinedlabelcrop = torch.cat((combinedlabelcrop,label_tr[sets_tr == 1]),0)
+    #combinedlabelcrop = torch.cat((combinedlabelcrop,label_tr[sets_tr == 1]),0)
+    train_ds = TensorDataset(combinedtrcrop,combinedlabelcrop)
+    val_ds = TensorDataset(data_tr[sets_tr == 2], label_tr[sets_tr == 2])
     return train_ds, val_ds
 

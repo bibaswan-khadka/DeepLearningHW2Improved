@@ -58,7 +58,7 @@ def cnn_categorization(model_type="base",
         # create netspec_opts
         netspec_opts = {
             "kernel_size": [3, 0, 0, 2, 3, 0, 0, 2, 3, 0, 0, 8, 1],
-            "num_filters": [32, 32, 0, 0, 64, 64, 0, 0, 128, 128, 0, 0, 16],
+            "num_filters": [70, 70, 0, 0, 140, 140, 0, 0, 280, 280, 0, 0, 16],
             "stride": [1, 0, 0, 2, 1, 0, 0, 2, 1, 0, 0, 1, 1],
             "layer_type": ["conv", "bn", "relu", "pool", "conv", "bn", "relu", "pool", "conv", "bn", "relu", "pool", "conv"]
         }
@@ -69,7 +69,7 @@ def cnn_categorization(model_type="base",
             "batch_size": 128,
             "momentum": 0.9,
             "num_epochs": 25,
-            "step_size": 20,
+            "step_size": [10,15,20],
             "gamma": 0.1
         }
         # create improved model
